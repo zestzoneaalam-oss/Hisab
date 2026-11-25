@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101827">
+<title>Daily Hisab Register</title>
+<style>
+:root{--bg:#0b1220;--panel:#17263c;--line:#344761;--text:#f5f7fb;--muted:#aab7ca;--green:#20c997;--blue:#4da3ff;--purple:#a78bfa;--orange:#ffad5c;--red:#ff6b81}
+*{box-sizing:border-box}
+body{margin:0;padding:14px;background:linear-gradient(145deg,#0b1220,#17213b,#101827);color:var(--text);font-family:Arial,system-ui,sans-serif}
+.wrap{max-width:1100px;margin:auto}
+header{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+h1{margin:0;font-size:25px}header p{color:var(--muted);margin:5px 0}
+.card{background:#17263cf5;border:1px solid var(--line);border-radius:17px;padding:16px;margin:14px 0;box-shadow:0 8px 25px #0003}
+h2{font-size:18px;margin:0 0 14px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.stat{padding:14px;border-radius:13px;background:linear-gradient(135deg,#203954,#17263c);border:1px solid #405675}
+.stat small{display:block;color:#c4d4e8;font-size:12px}
+.stat b{display:block;font-size:23px;margin-top:7px;overflow-wrap:anywhere}
+.cash{border-top:4px solid var(--green)}.online{border-top:4px solid var(--blue)}.total{border-top:4px solid var(--purple)}.extra{border-top:4px solid var(--orange)}
+.formgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+label{display:block;color:#bdcce0;font-size:13px;margin:8px 0 5px}
+input,select,textarea{width:100%;padding:12px;border:1px solid #405675;border-radius:10px;background:#0d192b;color:white;font-size:15px}
+button,.btn{border:0;border-radius:10px;padding:11px 14px;font-weight:bold;background:#344b68;color:white;cursor:pointer;font-size:13px}
+button:active{transform:scale(.98)}
+.greenbtn{background:linear-gradient(100deg,#0ca77d,#20c997);color:#05271e}
+.bluebtn{background:linear-gradient(100deg,#2878d8,#4da3ff);color:#071d35}
+.purplebtn{background:linear-gradient(100deg,#805ad5,#a78bfa);color:#190e32}
+.redbtn{background:#54283b;color:#ffb2c1}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}
+.actions button{flex:0 0 auto}
+.toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.tablewrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:650px}
+th,td{text-align:left;padding:11px 9px;border-bottom:1px solid #344761;font-size:13px}
+th{color:#a9c5e4;background:#203650}
+.tag{display:inline-block;padding:5px 9px;border-radius:20px;background:#174d40;color:#7af0c9}
+.billgallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
+.billcard{background:linear-gradient(140deg,#234a70,#49306c);padding:14px;border:1px solid #60799b;border-radius:14px}
+.billcard b{display:block;font-size:20px;margin:8px 0}
+.note{color:#aab7ca;font-size:12px;line-height:1.5}
+.seth{background:linear-gradient(140deg,#162d4c,#342456,#16483f);border:1px solid #6c70a5}
+.sethstats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.sethstat{padding:14px;border-radius:13px;background:linear-gradient(135deg,#e5f8ef,#c8e9ff);color:#17304c}
+.sethstat:nth-child(2){background:linear-gradient(135deg,#d9eaff,#b9d6ff)}
+.sethstat:nth-child(3){background:linear-gradient(135deg,#eee1ff,#d9c6ff)}
+.sethstat:nth-child(4){background:linear-gradient(135deg,#fff0d8,#ffdb9b)}
+.sethstat small{display:block;font-size:12px}.sethstat b{font-size:22px;display:block;margin-top:7px}
+.empty{text-align:center;padding:20px;color:#aab7ca}
+@media(max-width:700px){.grid{grid-template-columns:repeat(2,1fr)}.formgrid{grid-template-columns:1fr 1fr}.sethstats{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:430px){.formgrid{grid-template-columns:1fr}.actions button{flex:1}.stat b{font-size:19px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+ <div><h1>📒 Daily Hisab</h1><p>Cash • Online • Daily Bill • Seth Cash Register</p></div>
+ <span>🔒 Data इसी डिवाइस में सेव होगा</span>
+</header>
+
+<section class="grid">
+ <div class="stat cash"><small>आज का Cash</small><b id="todayCash">₹0</b></div>
+ <div class="stat online"><small>आज का Online</small><b id="todayOnline">₹0</b></div>
+ <div class="stat total"><small>आज का Total</small><b id="todayTotal">₹0</b></div>
+ <div class="stat extra"><small>कुल हिसाब</small><b id="grandTotal">₹0</b></div>
+</section>
+
+<section class="card">
+ <h2>🏆 शुरुआत से आज तक का हिसाब</h2>
+ <div class="grid">
+  <div class="stat cash"><small>कुल Cash</small><b id="lifeCash">₹0</b></div>
+  <div class="stat online"><small>कुल Online</small><b id="lifeOnline">₹0</b></div>
+  <div class="stat total"><small>कुल कारोबार</small><b id="lifeBusiness">₹0</b></div>
+  <div class="stat extra"><small>कुल बिल</small><b id="billCount">0</b></div>
+ </div>
+</section>
+
+<section class="card">
+ <h2 id="formTitle">➕ आज का हिसाब जोड़ें</h2>
+ <form id="entryForm">
+  <div class="formgrid">
+   <div><label>तारीख</label><input id="entryDate" type="date" required></div>
+   <div><label>Bill Number</label><input id="billNo" placeholder="AR012"></div>
+   <div><label>Cash ₹</label><input id="cash" type="number" min="0" step=".01" value="0" required></div>
+   <div><label>Online ₹</label><input id="online" type="number" min="0" step=".01" value="0" required></div>
+   <div><label>Extra ₹</label><input id="extra" type="number" min="0" step=".01" value="0"></div>
+   <div><label>Extra Total में जोड़ें?</label><select id="extraMode"><option value="no">नहीं, अलग रखें</option><option value="yes">हाँ, जोड़ें</option></select></div>
+   <div style="grid-column:1/-1"><label>नोट</label><input id="note" maxlength="120" placeholder="आज का हिसाब"></div>
+  </div>
+  <div class="actions">
+   <button class="greenbtn" type="submit" id="saveBtn">💾 हिसाब सेव करें</button>
+   <button type="button" id="resetBtn">Reset</button>
+   <button type="button" class="bluebtn" id="dailyPdfBtn">🧾 Daily PDF</button>
+  </div>
+ </form>
+ <p class="note">एक तारीख पर एक ही रिकॉर्ड रहेगा। उसी तारीख को दोबारा सेव करने पर रिकॉर्ड अपडेट होगा।</p>
+</section>
+
+<section class="card">
+ <div class="toolbar"><h2>📆 रोजाना हिस्ट्री</h2><input type="month" id="monthFilter" style="max-width:190px"></div>
+ <div class="tablewrap"><table>
+  <thead><tr><th>Bill</th><th>तारीख</th><th>Cash</th><th>Online</th><th>Extra</th><th>Total</th><th>Action</th></tr></thead>
+  <tbody id="historyBody"></tbody>
+ </table></div>
+ <div class="empty" id="emptyHistory" hidden>अभी कोई रिकॉर्ड नहीं है।</div>
+</section>
+
+<section class="card">
+ <h2>🖼️ Bill Gallery</h2>
+ <div class="billgallery" id="billGallery"></div>
+</section>
+
+<section class="card">
+ <h2>📊 महीने का हिसाब</h2>
+ <div class="grid">
+  <div class="stat cash"><small>Month Cash</small><b id="monthCash">₹0</b></div>
+  <div class="stat online"><small>Month Online</small><b id="monthOnline">₹0</b></div>
+  <div class="stat total"><small>Month Total</small><b id="monthTotal">₹0</b></div>
+  <div class="stat extra"><small>Month Bills</small><b id="monthCount">0</b></div>
+ </div>
+</section>
+
+<section class="card no-print">
+ <h2>📄 PDF और Backup</h2>
+ <div class="actions">
+  <button class="purplebtn" id="fullPdfBtn">📚 पूरी हिस्ट्री PDF</button>
+  <button class="bluebtn" id="csvBtn">⬇️ Excel / CSV</button>
+  <button id="backupBtn">💾 Backup Download</button>
+  <label class="btn" for="restoreFile">📂 Backup Restore</label>
+  <input type="file" id="restoreFile" accept="application/json" hidden>
+ </div>
+ <p class="note">PDF डाउनलोड करने पर Print विंडो खुलेगी। वहाँ Destination में Save as PDF चुनें और Save दबाएँ।</p>
+</section>
+
+<section class="card seth" id="sethCashLedger">
+ <h2>💰 Seth Cash — अलग हिसाब</h2>
+ <p class="note">यह हिसाब Daily Cash और Online हिस्ट्री से अलग सेव होता है।</p>
+ <div class="sethstats">
+  <div class="sethstat"><small>कुल उपलब्ध Cash</small><b id="sethSumCash">₹0</b></div>
+  <div class="sethstat"><small>Seth को कुल दिया</small><b id="sethSumSent">₹0</b></div>
+  <div class="sethstat"><small>बाकी Cash</small><b id="sethSumBalance">₹0</b></div>
+  <div class="sethstat"><small>कुल Entry</small><b id="sethSumCount">0</b></div>
+ </div>
+ <div class="formgrid" style="margin-top:15px">
+  <div><label>तारीख</label><input id="sethDate" type="date"></div>
+  <div><label>मेरे पास कितना Cash था?</label><input id="sethAvailable" type="number" min="0" placeholder="18000"></div>
+  <div><label>Seth को कितना दिया?</label><input id="sethSent" type="number" min="0" placeholder="17000"></div>
+  <div style="grid-column:1/-1"><label>नोट</label><input id="sethMemo" placeholder="जैसे Kundan के हाथ से भेजा"></div>
+ </div>
+ <p><b>इस एंट्री में बाकी: </b><span id="sethEntryBalance">₹0</span></p>
+ <div class="actions">
+  <button class="greenbtn" id="sethSave">💾 Seth Cash Save</button>
+  <button class="purplebtn" id="sethPdf">📄 Seth Cash Colour PDF</button>
+  <button id="sethCancel" hidden>Cancel</button>
+ </div>
+ <h2 style="margin-top:20px">📒 Seth Cash History</h2>
+ <div class="tablewrap"><table>
+  <thead><tr><th>तारीख</th><th>मेरे पास</th><th>दिया</th><th>बाकी</th><th>नोट</th><th>Action</th></tr></thead>
+  <tbody id="sethRows"></tbody>
+ </table></div>
+ <p id="sethEmpty" class="empty" hidden>अभी कोई Seth Cash Entry नहीं है।</p>
+</section>
+</div>
+
+<script>
+'use strict';
+
+/* Daily Hisab: पुरानी storage key को ही रखा गया है */
+const KEY='daily_hisab_records_v1';
+const SETH_KEY='daily_hisab_seth_cash_ledger_v1';
+const $=id=>document.getElementById(id);
+const money=n=>'₹'+Number(n||0).toLocaleString('en-IN',{maximumFractionDigits:2});
+const today=()=>{
+ const d=new Date();
+ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+};
+const dayName=d=>new Date(d+'T12:00:00').toLocaleDateString('en-IN',{weekday:'long'});
+const total=r=>Number(r.cash||0)+Number(r.online||0)+(r.extraMode==='yes'?Number(r.extra||0):0);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let records={};
+let editingDate=null;
+
+function loadRecords(){
+ try{records=JSON.parse(localStorage.getItem(KEY)||'{}');if(!records||Array.isArray(records))records={};}
+ catch(e){records={};}
+}
+function saveRecords(){localStorage.setItem(KEY,JSON.stringify(records));}
+function allRecords(){return Object.values(records).sort((a,b)=>b.date.localeCompare(a.date));}
+function makeBillNo(){
+ let max=0;
+ Object.values(records).forEach(r=>{
+  const m=String(r.billNo||'').match(/^AR(\d+)$/i);
+  if(m)max=Math.max(max,Number(m[1]));
+ });
+ return 'AR'+String(max+1).padStart(3,'0');
+}
+
+/* Uploaded Daily Hisab PDF की आठ entries. Existing records को overwrite नहीं करेंगे. */
+const IMPORT_MARK='daily_hisab_pdf_history_import_20261125_v2';
+loadRecords();
+if(!localStorage.getItem(IMPORT_MARK)){
+ const old={
+ '2026-11-18':{date:'2026-11-18',billNo:'AR001',cash:3000,online:4400,extra:40,extraMode:'no',note:'Wednesday'},
+ '2026-11-19':{date:'2026-11-19',billNo:'AR002',cash:4200,online:2950,extra:0,extraMode:'no',note:'Thursday'},
+ '2026-11-20':{date:'2026-11-20',billNo:'AR003',cash:3000,online:1880,extra:0,extraMode:'no',note:'Friday'},
+ '2026-11-21':{date:'2026-11-21',billNo:'AR004',cash:4670,online:2600,extra:0,extraMode:'no',note:'Saturday'},
+ '2026-11-22':{date:'2026-11-22',billNo:'AR005',cash:3350,online:2850,extra:0,extraMode:'no',note:'Sunday'},
+ '2026-11-23':{date:'2026-11-23',billNo:'AR009',cash:0,online:0,extra:0,extraMode:'no',note:'Monday'},
+ '2026-11-24':{date:'2026-11-24',billNo:'AR006',cash:1000,online:1700,extra:0,extraMode:'no',note:'Tuesday'},
+ '2026-11-25':{date:'2026-11-25',billNo:'AR011',cash:1500,online:1620,extra:0,extraMode:'no',note:'Wednesday'}
+ };
+ Object.entries(old).forEach(([d,r])=>{if(!records[d])records[d]=r;});
+ saveRecords();localStorage.setItem(IMPORT_MARK,'1');
+}
+
+function resetForm(){
+ editingDate=null;
+ $('entryForm').reset();
+ $('entryDate').value=today();
+ $('cash').value='0';$('online').value='0';$('extra').value='0';
+ $('extraMode').value='no';
+ $('formTitle').textContent='➕ आज का हिसाब जोड़ें';
+ $('saveBtn').textContent='💾 हिसाब सेव करें';
+}
+function render(){
+ const list=allRecords(),t=today(),tr=records[t]||{cash:0,online:0,extra:0,extraMode:'no'};
+ $('todayCash').textContent=money(tr.cash);
+ $('todayOnline').textContent=money(tr.online);
+ $('todayTotal').textContent=money(total(tr));
+ $('grandTotal').textContent=money(list.reduce((a,r)=>a+total(r),0));
+ const cash=list.reduce((a,r)=>a+Number(r.cash||0),0);
+ const online=list.reduce((a,r)=>a+Number(r.online||0),0);
+ $('lifeCash').textContent=money(cash);
+ $('lifeOnline').textContent=money(online);
+ $('lifeBusiness').textContent=money(cash+online);
+ $('billCount').textContent=list.length;
+
+ const month=$('monthFilter').value||t.slice(0,7);
+ const ml=list.filter(r=>r.date.startsWith(month));
+ $('monthCash').textContent=money(ml.reduce((a,r)=>a+Number(r.cash||0),0));
+ $('monthOnline').textContent=money(ml.reduce((a,r)=>a+Number(r.online||0),0));
+ $('monthTotal').textContent=money(ml.reduce((a,r)=>a+total(r),0));
+ $('monthCount').textContent=ml.length;
+
+ $('historyBody').innerHTML='';
+ $('emptyHistory').hidden=ml.length>0;
+ ml.forEach(r=>{
+  const tr=document.createElement('tr');
+  tr.innerHTML=`<td><b>${esc(r.billNo)}</b></td>
+  <td>${r.date}<br>${dayName(r.date)}</td>
+  <td>${money(r.cash)}</td><td>${money(r.online)}</td>
+  <td>${money(r.extra)}</td><td><span class="tag">${money(total(r))}</span></td>
+  <td><button data-edit="${r.date}">Edit</button>
+  <button class="redbtn" data-delete="${r.date}">Delete</button>
+  <button class="bluebtn" data-pdf="${r.date}">PDF</button></td>`;
+  $('historyBody').appendChild(tr);
+ });
+
+ $('billGallery').innerHTML='';
+ ml.forEach(r=>{
+  const div=document.createElement('div');
+  div.className='billcard';
+  div.innerHTML=`🧾 <b>${esc(r.billNo)}</b>${r.date}<br>${dayName(r.date)}
+  <b>${money(total(r))}</b><small>Cash ${money(r.cash)}<br>Online ${money(r.online)}</small>
+  <div class="actions"><button class="bluebtn" data-pdf="${r.date}">PDF Download</button></div>`;
+  $('billGallery').appendChild(div);
+ });
+}
+$('entryForm').addEventListener('submit',e=>{
+ e.preventDefault();
+ const d=$('entryDate').value;
+ if(!d)return;
+ const bill=$('billNo').value.trim().toUpperCase()||
+ (editingDate&&records[editingDate]?records[editingDate].billNo:makeBillNo());
+ if(!/^AR\d{3,}$/i.test(bill)){alert('Bill number AR001 जैसे लिखें।');return;}
+ const duplicate=Object.values(records).some(r=>r.billNo===bill&&r.date!==d);
+ if(duplicate){alert('यह Bill Number पहले से इस्तेमाल हुआ है।');return;}
+ const r={date:d,billNo:bill,cash:Number($('cash').value||0),online:Number($('online').value||0),extra:Number($('extra').value||0),extraMode:$('extraMode').value,note:$('note').value.trim()};
+ if(r.cash<0||r.online<0||r.extra<0){alert('रकम शून्य से कम नहीं हो सकती।');return;}
+ if(editingDate&&editingDate!==d)delete records[editingDate];
+ records[d]=r;saveRecords();$('monthFilter').value=d.slice(0,7);resetForm();render();
+ alert('Daily Hisab सेव हो गया।');
+});
+$('resetBtn').onclick=resetForm;
+$('monthFilter').value=today().slice(0,7);
+$('monthFilter').onchange=render;
+
+$('historyBody').addEventListener('click',e=>{
+ const d=e.target.dataset.edit,del=e.target.dataset.delete,pdf=e.target.dataset.pdf;
+ if(d){
+  const r=records[d];editingDate=d;
+  $('entryDate').value=r.date;$('billNo').value=r.billNo;
+  $('cash').value=r.cash;$('online').value=r.online;$('extra').value=r.extra;
+  $('extraMode').value=r.extraMode||'no';$('note').value=r.note||'';
+  $('formTitle').textContent='✏️ हिसाब Edit करें';$('saveBtn').textContent='Update Hisab';
+  window.scrollTo({top:0,behavior:'smooth'});
+ }
+ if(del&&confirm(del+' का रिकॉर्ड हटाना है?')){delete records[del];saveRecords();render();}
+ if(pdf)makeDailyPDF(records[pdf]);
+});
+$('billGallery').addEventListener('click',e=>{
+ const d=e.target.dataset.pdf;if(d)makeDailyPDF(records[d]);
+});
+
+/* Color PDF बनाने के लिए print dialog खुलता है */
+function openPrint(html){
+ const w=window.open('','_blank');
+ if(!w){alert('PDF बनाने के लिए Browser में Pop-ups Allow करें।');return;}
+ w.document.open();w.document.write(html);w.document.close();
+}
+function pdfShell(title,sub,body){
+ return `<!DOCTYPE html><html lang="hi"><head><meta charset="UTF-8"><title>${esc(title)}</title>
+ <style>
+ *{box-sizing:border-box}body{font-family:Arial,sans-serif;background:#edf3ff;color:#17253a;margin:0;padding:25px}
+ .sheet{max-width:900px;margin:auto;background:white;border-radius:17px;overflow:hidden;box-shadow:0 10px 30px #1233}
+ .head{padding:27px;background:linear-gradient(120deg,#103b79,#7442b7 60%,#079b83);color:white}
+ .head h1{font-size:27px;margin:0 0 8px}.head p{margin:0;color:#e4edff}
+ .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:18px}
+ .stat{padding:15px;border-radius:13px;background:linear-gradient(135deg,#ddf8e9,#c6f0dd);border-bottom:4px solid #12a477}
+ .stat:nth-child(2){background:linear-gradient(135deg,#e1efff,#c5ddff);border-color:#3285e4}
+ .stat:nth-child(3){background:linear-gradient(135deg,#f0e5ff,#ddcaff);border-color:#8855d2}
+ .stat small{display:block;color:#50627a;font-weight:bold}.stat b{display:block;font-size:22px;margin-top:8px}
+ .content{padding:0 18px 25px}h2{color:#234d7b;font-size:18px}
+ table{width:100%;border-collapse:collapse}th{background:#193f77;color:white;padding:11px;text-align:left;font-size:12px}
+ td{padding:10px;border-bottom:1px solid #dce5f1;font-size:12px}
+ tbody tr:nth-child(even){background:#f0f5ff}
+ .foot{padding:14px 20px;background:#f4f7fc;color:#65758a;font-size:11px}
+ .green{color:#07845d;font-weight:bold}.blue{color:#236ec1;font-weight:bold}
+ @page{size:A4;margin:12mm}
+ @media print{body{padding:0;background:white}.sheet{box-shadow:none;border-radius:0}.head,.stats,.stat,th{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+ </style></head><body><main class="sheet"><header class="head"><h1>${title}</h1><p>${sub}</p></header>${body}<footer class="foot">Daily Hisab Register • Generated ${new Date().toLocaleDateString('en-IN')}</footer></main></body></html>`;
+}
+function makeDailyPDF(r){
+ if(!r){alert('इस तारीख का रिकॉर्ड नहीं मिला।');return;}
+ const body=`<section class="stats">
+ <div class="stat"><small>💵 CASH RECEIVED</small><b>${money(r.cash)}</b></div>
+ <div class="stat"><small>📱 ONLINE RECEIVED</small><b>${money(r.online)}</b></div>
+ <div class="stat"><small>🧮 TOTAL COLLECTION</small><b>${money(total(r))}</b></div></section>
+ <section class="content"><h2>🧾 Daily Bill Details</h2><table>
+ <tr><th>विवरण</th><th>रकम</th></tr>
+ <tr><td>Bill Number</td><td>${esc(r.billNo)}</td></tr>
+ <tr><td>तारीख</td><td>${r.date} — ${dayName(r.date)}</td></tr>
+ <tr><td>Cash</td><td class="green">${money(r.cash)}</td></tr>
+ <tr><td>Online</td><td class="blue">${money(r.online)}</td></tr>
+ <tr><td>Extra</td><td>${money(r.extra)}</td></tr>
+ <tr><td>Note</td><td>${esc(r.note||'—')}</td></tr>
+ <tr><th>GRAND TOTAL</th><th>${money(total(r))}</th></tr>
+ </table></section>`;
+ openPrint(pdfShell('🧾 DAILY HISAB BILL',`Bill ${esc(r.billNo)} • ${r.date} • ${dayName(r.date)}`,body));
+}
+function makeFullPDF(){
+ const list=allRecords().reverse();
+ if(!list.length){alert('History खाली है।');return;}
+ const cash=list.reduce((a,r)=>a+Number(r.cash||0),0);
+ const online=list.reduce((a,r)=>a+Number(r.online||0),0);
+ const extra=list.reduce((a,r)=>a+Number(r.extra||0),0);
+ const grand=list.reduce((a,r)=>a+total(r),0);
+ const body=`<section class="stats">
+ <div class="stat"><small>कुल CASH</small><b>${money(cash)}</b></div>
+ <div class="stat"><small>कुल ONLINE</small><b>${money(online)}</b></div>
+ <div class="stat"><small>GRAND TOTAL</small><b>${money(grand)}</b></div></section>
+ <section class="content"><h2>📚 Complete Daily History</h2><table>
+ <thead><tr><th>तारीख</th><th>Bill No.</th><th>Cash</th><th>Online</th><th>Extra</th><th>Total</th></tr></thead>
+ <tbody>${list.map(r=>`<tr><td>${r.date}<br>${dayName(r.date)}</td><td>${esc(r.billNo)}</td><td class="green">${money(r.cash)}</td><td class="blue">${money(r.online)}</td><td>${money(r.extra)}</td><td><b>${money(total(r))}</b></td></tr>`).join('')}</tbody>
+ </table><p><b>Total Extra:</b> ${money(extra)} &nbsp; <b>Total Bills:</b> ${list.length}</p></section>`;
+ openPrint(pdfShell('📚 COMPLETE HISAB HISTORY','सभी तारीखों का Cash + Online + Extra Statement',body));
+}
+$('dailyPdfBtn').onclick=()=>{
+ const d=$('entryDate').value;
+ if(records[d])makeDailyPDF(records[d]);
+ else{
+  const r={date:d,billNo:$('billNo').value||'NEW',cash:Number($('cash').value||0),online:Number($('online').value||0),extra:Number($('extra').value||0),extraMode:$('extraMode').value,note:$('note').value};
+  if(!r.cash&&!r.online&&!r.extra){alert('पहले रकम डालें या हिसाब सेव करें।');return;}
+  makeDailyPDF(r);
+ }
+};
+$('fullPdfBtn').onclick=makeFullPDF;
+
+/* CSV और Backup */
+function downloadFile(content,name,type){
+ const blob=new Blob([content],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');
+ a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1500);
+}
+$('csvBtn').onclick=()=>{
+ const rows=[['Date','Bill','Cash','Online','Extra','Total','Note'],
+ ...allRecords().reverse().map(r=>[r.date,r.billNo,r.cash,r.online,r.extra,total(r),r.note||''])];
+ const csv=rows.map(row=>row.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');
+ downloadFile('\ufeff'+csv,'daily-hisab-history.csv','text/csv;charset=utf-8');
+};
+$('backupBtn').onclick=()=>{
+ const backup={format:'daily-hisab-backup-v1',records,exportedAt:new Date().toISOString(),
+ seth:JSON.parse(localStorage.getItem(SETH_KEY)||'[]')};
+ downloadFile(JSON.stringify(backup,null,2),'daily-hisab-backup.json','application/json');
+};
+$('restoreFile').onchange=async e=>{
+ const f=e.target.files[0];if(!f)return;
+ try{
+  const b=JSON.parse(await f.text());
+  const incoming=b.records||b;
+  if(!incoming||typeof incoming!=='object')throw Error('गलत Backup');
+  if(!confirm('Backup को मौजूदा रिकॉर्ड के साथ Merge करना है? एक ही तारीख का रिकॉर्ड Backup से बदलेगा।'))return;
+  records={...records,...incoming};saveRecords();
+  if(Array.isArray(b.seth))localStorage.setItem(SETH_KEY,JSON.stringify(b.seth));
+  render();loadSeth();alert('Backup Restore हो गया।');
+ }catch(err){alert('Backup Restore नहीं हुआ: '+err.message);}
+ e.target.value='';
+};
+
+/* Seth Cash अलग हिस्ट्री */
+let sethRows=[],sethEditing=null;
+function loadSeth(){
+ try{const v=JSON.parse(localStorage.getItem(SETH_KEY)||'[]');sethRows=Array.isArray(v)?v:[];}
+ catch(e){sethRows=[];}
+}
+function saveSeth(){localStorage.setItem(SETH_KEY,JSON.stringify(sethRows));}
+function sethBalance(){return sethRows.reduce((a,r)=>a+Number(r.available||0)-Number(r.sent||0),0);}
+function resetSeth(){
+ sethEditing=null;$('sethDate').value=today();$('sethAvailable').value='';
+ $('sethSent').value='';$('sethMemo').value='';$('sethSave').textContent='💾 Seth Cash Save';
+ $('sethCancel').hidden=true;updateSethEntry();
+}
+function updateSethEntry(){
+ const a=Number($('sethAvailable').value||0),s=Number($('sethSent').value||0);
+ $('sethEntryBalance').textContent=money(a-s);
+}
+$('sethAvailable').oninput=updateSethEntry;
+$('sethSent').oninput=updateSethEntry;
+$('sethCancel').onclick=resetSeth;
+
+function renderSeth(){
+ const available=sethRows.reduce((a,r)=>a+Number(r.available||0),0);
+ const sent=sethRows.reduce((a,r)=>a+Number(r.sent||0),0);
+ $('sethSumCash').textContent=money(available);
+ $('sethSumSent').textContent=money(sent);
+ $('sethSumBalance').textContent=money(available-sent);
+ $('sethSumCount').textContent=sethRows.length;
+ $('sethRows').innerHTML='';
+ const sorted=[...sethRows].sort((a,b)=>b.date.localeCompare(a.date));
+ $('sethEmpty').hidden=sorted.length>0;
+ sorted.forEach(r=>{
+  const tr=document.createElement('tr');
+  tr.innerHTML=`<td>${r.date}</td><td>${money(r.available)}</td><td>${money(r.sent)}</td>
+  <td>${money(Number(r.available)-Number(r.sent))}</td><td>${esc(r.memo||'—')}</td>
+  <td><button data-sethedit="${r.id}">Edit</button><button class="redbtn" data-sethdelete="${r.id}">Delete</button></td>`;
+  $('sethRows').appendChild(tr);
+ });
+}
+$('sethSave').onclick=()=>{
+ const date=$('sethDate').value;
+ const av=$('sethAvailable').value,sentValue=$('sethSent').value;
+ const available=Number(av),sent=Number(sentValue),memo=$('sethMemo').value.trim();
+ if(!date||av===''||sentValue===''){alert('तारीख, उपलब्ध Cash और दिया हुआ Cash भरें।');return;}
+ if(!Number.isFinite(available)||!Number.isFinite(sent)||available<0||sent<0){alert('रकम सही डालें।');return;}
+ if(sent>available){alert('Seth को दिया Cash उपलब्ध Cash से ज्यादा नहीं हो सकता।');return;}
+ if(sethEditing){
+  const i=sethRows.findIndex(r=>r.id===sethEditing);
+  if(i>=0)sethRows[i]={...sethRows[i],date,available,sent,memo};
+ }else{
+  sethRows.push({id:'S-'+Date.now(),date,available,sent,memo});
+ }
+ saveSeth();renderSeth();resetSeth();alert('Seth Cash हिसाब सेव हो गया।');
+};
+$('sethRows').addEventListener('click',e=>{
+ const edit=e.target.dataset.sethedit,del=e.target.dataset.sethdelete;
+ if(edit){
+  const r=sethRows.find(x=>x.id===edit);if(!r)return;
+  sethEditing=edit;$('sethDate').value=r.date;$('sethAvailable').value=r.available;
+  $('sethSent').value=r.sent;$('sethMemo').value=r.memo||'';
+  $('sethSave').textContent='Update Seth Cash';$('sethCancel').hidden=false;updateSethEntry();
+  $('sethCashLedger').scrollIntoView({behavior:'smooth'});
+ }
+ if(del&&confirm('यह Seth Cash Entry Delete करनी है?')){
+  sethRows=sethRows.filter(r=>r.id!==del);saveSeth();renderSeth();
+  if(sethEditing===del)resetSeth();
+ }
+});
+
+/* PDF से मिली Seth की पुरानी entry — केवल एक बार import होगी */
+const SETH_IMPORT_MARK='daily_hisab_seth_pdf_import_20261125_v1';
+loadSeth();
+if(!localStorage.getItem(SETH_IMPORT_MARK)){
+ const exists=sethRows.some(r=>r.date==='2026-11-23'&&Number(r.available)===18000&&Number(r.sent)===17000);
+ if(!exists)sethRows.push({
+  id:'S-PDF-20261123-18000-17000',date:'2026-11-23',
+  available:18000,sent:17000,memo:'Kundan ke hath se bhijaya tha'
+ });
+ saveSeth();localStorage.setItem(SETH_IMPORT_MARK,'1');
+}
+
+function makeSethPDF(){
+ if(!sethRows.length){alert('Seth Cash History खाली है।');return;}
+ const rows=[...sethRows].sort((a,b)=>a.date.localeCompare(b.date));
+ const available=rows.reduce((a,r)=>a+Number(r.available||0),0);
+ const sent=rows.reduce((a,r)=>a+Number(r.sent||0),0);
+ const body=`<section class="stats">
+ <div class="stat"><small>कुल उपलब्ध Cash</small><b>${money(available)}</b></div>
+ <div class="stat"><small>Seth को कुल दिया</small><b>${money(sent)}</b></div>
+ <div class="stat"><small>बाकी Cash</small><b>${money(available-sent)}</b></div>
+ </section><section class="content"><h2>💰 Seth Cash — पूरी हिस्ट्री</h2>
+ <table><thead><tr><th>तारीख</th><th>मेरे पास</th><th>Seth को दिया</th><th>बाकी</th><th>नोट</th></tr></thead>
+ <tbody>${rows.map(r=>`<tr><td>${r.date}</td><td class="blue">${money(r.available)}</td>
+ <td class="green">${money(r.sent)}</td><td><b>${money(Number(r.available)-Number(r.sent))}</b></td>
+ <td>${esc(r.memo||'—')}</td></tr>`).join('')}</tbody></table>
+ <p><b>कुल Entry:</b> ${rows.length}</p></section>`;
+ openPrint(pdfShell('💰 SETH CASH — FULL HISTORY','अलग Cash Ledger • Available • Given • Balance',body));
+}
+$('sethPdf').onclick=makeSethPDF;
+
+/* शुरुआती पेज लोड */
+$('entryDate').value=today();
+$('monthFilter').value=today().slice(0,7);
+resetSeth();
+render();
+renderSeth();
+</script>
+</body>
+</html>
