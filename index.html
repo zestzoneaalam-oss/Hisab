@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#101827">
+<title>Daily Hisab — Cash & Online Register</title>
+<style>
+:root{--bg:#0b1220;--panel:#131f32;--panel2:#1b2a40;--text:#f5f7fb;--muted:#aab7ca;--line:#2b3b52;--green:#20c997;--blue:#4da3ff;--purple:#a78bfa;--orange:#ffad5c;--red:#ff6b81}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(145deg,#0b1220,#111d31 55%,#101827);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;padding:16px;min-height:100vh}
+.wrap{max-width:1050px;margin:auto}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}.brand h1{font-size:25px;margin:0}.brand p{margin:4px 0;color:var(--muted);font-size:13px}.pill{background:#1d3650;color:#9ed4ff;border:1px solid #315477;padding:7px 11px;border-radius:30px;font-size:12px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}.stat{padding:15px;border-radius:16px;background:linear-gradient(135deg,#1b2c43,#142236);border:1px solid var(--line);min-width:0}.stat small{color:var(--muted);display:block;font-size:12px}.stat strong{display:block;font-size:clamp(19px,3vw,26px);margin-top:6px;overflow-wrap:anywhere}.stat.cash{border-top:3px solid var(--green)}.stat.online{border-top:3px solid var(--blue)}.stat.total{border-top:3px solid var(--purple)}.stat.days{border-top:3px solid var(--orange)}
+.card{background:rgba(19,31,50,.96);border:1px solid var(--line);border-radius:18px;padding:17px;margin-bottom:15px;box-shadow:0 10px 30px #0002}.card h2{font-size:17px;margin:0 0 13px}.formgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.field label{display:block;color:var(--muted);font-size:12px;margin-bottom:6px}.field input,.field select,.field textarea{width:100%;padding:12px;border:1px solid #344761;border-radius:11px;background:#0e1929;color:white;font-size:15px;outline:none}.field input:focus,.field select:focus{border-color:var(--blue)}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}.btn{border:0;border-radius:11px;padding:11px 15px;font-weight:700;font-size:14px;cursor:pointer;background:#263951;color:white}.btn.primary{background:linear-gradient(100deg,#11ad83,#20c997);color:#06251e}.btn.blue{background:linear-gradient(100deg,#2878d8,#4da3ff);color:#061b31}.btn.purple{background:linear-gradient(100deg,#805ad5,#a78bfa);color:#190e32}.btn.red{background:#4a2635;color:#ff9caf}.btn:active{transform:scale(.98)}
+.toolbar{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px}.toolbar input{max-width:210px;padding:10px;border-radius:10px;border:1px solid #344761;background:#0e1929;color:white}.tablewrap{overflow-x:auto}table{width:100%;border-collapse:collapse;min-width:650px}th,td{text-align:left;padding:12px 10px;border-bottom:1px solid var(--line);font-size:13px}th{color:#9fb0c6;font-weight:600}td strong{font-size:14px}.tag{display:inline-block;padding:4px 8px;border-radius:20px;font-size:11px;background:#1e3e3b;color:#6ce2bd}.empty{text-align:center;color:var(--muted);padding:25px}.mini{padding:7px 9px;font-size:12px;border-radius:8px}.muted{color:var(--muted)}.note{font-size:12px;line-height:1.5;color:var(--muted);margin-top:10px}.dayhead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.todaydate{color:#a9cfff;font-size:13px}.footer{text-align:center;color:#77869b;font-size:11px;padding:12px}
+@media(max-width:720px){body{padding:11px}.grid{grid-template-columns:repeat(2,1fr)}.formgrid{grid-template-columns:1fr 1fr}.brand h1{font-size:22px}.card{padding:14px}}
+@media(max-width:420px){.formgrid{grid-template-columns:1fr}.actions .btn{flex:1}.toolbar input{max-width:100%;width:100%}}
+@media print{body{background:white;color:#111;padding:0}.no-print{display:none!important}.card{box-shadow:none;border:1px solid #ddd;background:white;color:#111}.stat{background:#f4f7fb;color:#111;border:1px solid #ddd}.stat small,.muted{color:#555}.tag{background:#e7f7f1;color:#087a58}th,td{border-color:#ddd;color:#111}}
+.bill-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}.bill-card{background:linear-gradient(145deg,#203d60,#332653);border:1px solid #536582;border-radius:15px;padding:14px;cursor:pointer;box-shadow:0 7px 18px #0003}.bill-card .bill-date{font-weight:800;font-size:15px}.bill-card .bill-day{color:#c5d5ea;font-size:12px;margin:4px 0 12px}.bill-card .bill-total{font-size:23px;font-weight:800;color:#fff}.bill-card .bill-break{display:flex;justify-content:space-between;color:#d8e6f7;font-size:12px;margin-top:9px}
+.modal{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;padding:16px;z-index:99}.modal.show{display:flex}.modal-box{width:min(100%,460px);background:#142238;border:1px solid #526681;border-radius:19px;padding:18px;max-height:90vh;overflow:auto}.modal-head{display:flex;justify-content:space-between;align-items:center;gap:10px}.preview-bill{background:linear-gradient(145deg,#f4f7ff,#e8f4ff);color:#17253a;border-radius:15px;padding:18px;margin:14px 0}.preview-bill h3{margin:0;color:#254d80}.preview-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #cbd7e6}.preview-total{font-size:23px;font-weight:900;color:#176d57}.billno{color:#ffd166;font-weight:900}.bill-search{display:flex;gap:8px;flex-wrap:wrap}.bill-search input{flex:1;min-width:160px}
+.lifetime-card{background:linear-gradient(135deg,#172c49,#24204c 52%,#143e48);border:1px solid #526b91;padding:22px}.lifetime-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}.lifetime-heading h2{margin:0;font-size:21px}.lifetime-heading p{margin:6px 0 0;color:#b9c9e2;font-size:13px}.lifetime-chip{padding:7px 11px;border-radius:30px;background:linear-gradient(90deg,#f6c85f,#ff9f43);color:#38220a;font-size:11px;font-weight:900}.lifetime-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}.life-stat{min-height:142px;padding:18px 16px;border-radius:17px;color:#fff;display:flex;flex-direction:column;justify-content:space-between}.life-stat strong{font-size:clamp(23px,3vw,32px);margin:13px 0}.life-cash{background:linear-gradient(140deg,#087f5b,#20c997)}.life-online{background:linear-gradient(140deg,#1556a8,#3187f5)}.life-business{background:linear-gradient(140deg,#6b35b5,#9b62e8)}
+.photo-upload{border:1px dashed #4b78a8;border-radius:14px;padding:14px;background:#10243a}.photo-upload input{width:100%;color:#dcecff}.photo-hint{font-size:12px;color:#a9bdd5;margin-top:7px;line-height:1.5}.photo-strip{display:flex;gap:9px;flex-wrap:wrap;margin-top:10px}.photo-thumb{width:88px;height:88px;object-fit:cover;border-radius:10px;border:2px solid #5b8fc6;cursor:pointer}.photo-count{font-size:12px;color:#9ed4ff;margin-top:6px}.photo-modal{position:fixed;inset:0;background:#000e;z-index:120;display:none;align-items:center;justify-content:center;padding:16px}.photo-modal.show{display:flex}.photo-modal img{max-width:100%;max-height:82vh;object-fit:contain;border-radius:12px}.gallery-photo-row{display:flex;gap:6px;align-items:center;margin-top:8px}.gallery-photo-row img{width:38px;height:38px;object-fit:cover;border-radius:7px}
+.seth-ledger{background:#fff;border:2px solid #0f9d75;border-radius:16px;padding:16px;margin:18px 0;color:#17212b}.seth-ledger h2,.seth-ledger h3{margin:4px 0 14px;color:#087a5b}.seth-ledger .seth-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0}.seth-ledger .seth-stat{background:#e9f8f2;border-radius:11px;padding:12px;text-align:center}.seth-ledger .seth-stat small{display:block;color:#52635d}.seth-ledger .seth-stat strong{display:block;font-size:20px;margin-top:5px;color:#087a5b}.seth-ledger label{display:block;font-weight:700;margin:10px 0 5px}.seth-ledger input{box-sizing:border-box;width:100%;padding:12px;border:1px solid #ccd5d1;border-radius:9px;font-size:16px;background:#fff;color:#17212b}.seth-ledger .seth-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.seth-ledger button{border:0;border-radius:9px;padding:11px 14px;background:#087a5b;color:#fff;font-weight:700}.seth-ledger button.seth-edit{background:#2563eb}.seth-ledger button.seth-delete{background:#dc3545}.seth-ledger button.seth-cancel{background:#64748b}.seth-ledger .seth-table-wrap{overflow-x:auto;margin-top:12px}.seth-ledger table{width:100%;min-width:560px;border-collapse:collapse}.seth-ledger th,.seth-ledger td{padding:9px;border-bottom:1px solid #e1e7e4;text-align:left;white-space:nowrap}.seth-ledger th{background:#e9f8f2}
+@media(max-width:650px){.lifetime-grid{grid-template-columns:1fr}.life-stat{min-height:125px}}@media(min-width:600px){.seth-ledger .seth-stats{grid-template-columns:repeat(4,minmax(0,1fr))}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top"><div class="brand"><h1>📒 Daily Hisab</h1><p>Roz ka Cash • Online • Total • Bill Register</p></div><span class="pill">🔒 Aapka data isi device mein save hota hai</span></header>
+<section class="grid">
+<div class="stat cash"><small>💵 Aaj ka Cash</small><strong id="todayCash">₹0</strong></div><div class="stat online"><small>📱 Aaj ka Online</small><strong id="todayOnline">₹0</strong></div><div class="stat total"><small>🧮 Aaj ka Total</small><strong id="todayTotal">₹0</strong></div><div class="stat days"><small>📅 Ab tak ka Total</small><strong id="grandTotal">₹0</strong></div>
+</section>
+<section class="card lifetime-card"><div class="lifetime-heading"><div><h2>🏆 Shuruaat Se Aaj Tak — Total Dhandha</h2><p>Sabhi saved dates ka jama hisaab</p></div><span class="lifetime-chip">LIFETIME</span></div><div class="lifetime-grid"><div class="life-stat life-cash"><small>💵 Total Cash</small><strong id="lifeCash">₹0</strong><span>Ab tak mila hua cash</span></div><div class="life-stat life-online"><small>📱 Total Online</small><strong id="lifeOnline">₹0</strong><span>Ab tak online payment</span></div><div class="life-stat life-business"><small>🚀 Total Dhandha</small><strong id="lifeBusiness">₹0</strong><span>Grand business collection</span></div></div></section>
+<section class="card no-print"><div class="dayhead"><h2 id="formTitle">➕ Aaj ka Hisab Add Karein</h2><span class="todaydate" id="todayLabel"></span></div>
+<form id="entryForm"><div class="formgrid">
+<div class="field"><label for="entryDate">Bill Date / तारीख</label><input id="entryDate" type="date" required></div>
+<div class="field"><label for="billNo">Bill Number (खाली छोड़ें = Auto)</label><input id="billNo" type="text" maxlength="32" placeholder="AR001"></div>
+<div class="field"><label for="cash">Cash (₹)</label><input id="cash" type="number" min="0" step="0.01" value="0" required></div>
+<div class="field"><label for="online">Online (₹)</label><input id="online" type="number" min="0" step="0.01" value="0" required></div>
+<div class="field"><label for="extra">Extra / Majhar / Other (₹)</label><input id="extra" type="number" step="0.01" value="0"></div>
+<div class="field"><label for="note">Note (Optional)</label><input id="note" type="text" maxlength="80"></div>
+<div class="field photo-upload" style="grid-column:1/-1"><label for="paymentPhotos">📷 Payment Screenshot / Photo</label><input id="paymentPhotos" type="file" accept="image/*" multiple><div class="photo-hint">Payment screenshot attach karein. Maximum 8 photos per date.</div><div id="selectedPhotoPreview" class="photo-strip"></div></div>
+<div class="field"><label for="extraMode">Extra ko total mein</label><select id="extraMode"><option value="no">Alag dikhayein</option><option value="yes">Jodein</option></select></div>
+</div>
+<div class="actions"><button class="btn primary" type="submit" id="saveBtn">💾 Hisab Save Karein</button><button class="btn" type="button" id="resetBtn">Reset</button><button class="btn blue" type="button" id="billBtn">🧾 Aaj ka PDF Bill</button><button class="btn" type="button" id="shareTodayBtn">📲 WhatsApp Share</button></div>
+<p class="note">Har date ka ek daily record. Usi date par dobara save karne par purana record update hoga.</p></form></section>
+<section class="card no-print" id="utrPanel"><h2>🔔 UTR / Payment Notification Match</h2><p class="note">Google Pay notification text paste karein. Yeh bank ki live verification nahi hai.</p><div class="formgrid">
+<div class="field" style="grid-column:1/-1"><label for="notifText">Google Pay Notification Text</label><textarea id="notifText" rows="3"></textarea></div>
+<div class="field"><label for="utrDate">Payment Date</label><input id="utrDate" type="date"></div><div class="field"><label for="utrAmount">Payment Amount (₹)</label><input id="utrAmount" type="number" min="0.01" step="0.01"></div><div class="field" style="grid-column:1/-1"><label for="utrNumber">UTR / UPI Transaction ID</label><input id="utrNumber" type="text" maxlength="64"></div>
+</div><div class="actions"><button class="btn primary" type="button" id="matchUtrBtn">🔎 Notification se Match Karein</button></div><div id="utrStatus" class="note"></div></section>
+<section class="card"><div class="toolbar no-print"><h2>📆 Rozana History</h2><input id="searchDate" type="month"></div><div class="tablewrap"><table><thead><tr><th>Bill No.</th><th>Din / Date</th><th>Cash</th><th>Online</th><th>Extra</th><th>Total</th><th class="no-print">Action</th></tr></thead><tbody id="historyBody"></tbody></table></div><div class="empty" id="emptyState" hidden>Abhi koi hisab save nahi hai.</div></section>
+<section class="card"><div class="toolbar"><h2>🖼️ Colourful Bill Gallery</h2><span>Card par tap karke bill dekhein</span></div><div class="bill-search no-print"><input id="billLookup" type="search" placeholder="Bill number, jaise AR001"><button class="btn purple" id="findBillBtn">🔎 Find Bill</button></div><div class="bill-gallery" id="billGallery"></div><div class="empty" id="galleryEmpty" hidden>Is month mein abhi koi bill nahi hai.</div></section>
+<section class="card"><h2>📊 Selected Month Summary</h2><div class="grid" style="grid-template-columns:repeat(3,1fr);margin:0"><div class="stat cash"><small>Month Cash</small><strong id="monthCash">₹0</strong></div><div class="stat online"><small>Month Online</small><strong id="monthOnline">₹0</strong></div><div class="stat total"><small>Month Total</small><strong id="monthTotal">₹0</strong></div></div></section>
+<section class="card no-print"><h2>🛠️ Bill & Data Tools</h2><div class="actions"><button class="btn purple" id="allBillBtn">📄 Full History PDF</button><button class="btn blue" id="csvBtn">⬇️ Excel/CSV</button><button class="btn" id="backupBtn">💾 Backup Download</button><button class="btn red" id="clearAllBtn">🗑️ Clear All History</button><label class="btn" for="restoreFile">📂 Backup Restore</label><input id="restoreFile" type="file" accept="application/json" hidden></div><p class="note">Backup file sambhal kar rakhein.</p></section>
+<div class="footer">Daily Hisab Register • Offline-ready • Data aapke browser mein</div>
+</div>
+<div class="photo-modal" id="photoLightbox"><div style="width:100%;text-align:right"><button class="btn red" id="closePhoto">✕ Close</button><br><img id="lightboxImage" alt="Payment screenshot"></div></div>
+<div class="modal" id="billModal" role="dialog" aria-modal="true"><div class="modal-box"><div class="modal-head"><h2>🧾 Bill Preview</h2><button class="btn red" id="closeModal">✕</button></div><div id="billPreview"></div><b>📷 Payment Photos</b><div id="savedPhotoPreview" class="photo-strip"></div><div id="savedPhotoCount" class="photo-count"></div><div class="actions"><button class="btn primary" id="modalDownload">⬇️ PDF Download</button><button class="btn purple" id="modalImage">🖼️ Save Image</button><button class="btn blue" id="modalShare">📲 WhatsApp Share</button><button class="btn red" id="modalDelete">🗑️ Delete History</button></div></div></div>
+
+<script>
+const KEY='daily_hisab_records_v1',PHOTO_DB='daily_hisab_payment_photo_db';
+let records=loadRecords(),editingDate=null,selectedBillDate=null,photoDBPromise=null;
+const $=id=>document.getElementById(id);
+function loadRecords(){try{let v=JSON.parse(localStorage.getItem(KEY)||'{}');return v&&typeof v==='object'&&!Array.isArray(v)?v:{}}catch(e){return {}}}
+function saveRecords(){localStorage.setItem(KEY,JSON.stringify(records))}
+function money(n){return '₹'+(Number(n)||0).toLocaleString('en-IN',{maximumFractionDigits:2})}
+function total(r){return (+r.cash||0)+(+r.online||0)+(r.extraMode==='yes'?(+r.extra||0):0)}
+function dateObj(s){return new Date(s+'T12:00:00')}
+function dayName(s){return dateObj(s).toLocaleDateString('en-IN',{weekday:'long'})}
+function today(){let d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function sum(list,key){return list.reduce((a,r)=>a+(+r[key]||0),0)}
+function all(){return Object.keys(records).sort().reverse().map(k=>records[k])}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function makeBillNo(){let n=Object.values(records).reduce((m,r)=>Math.max(m,Number((String(r.billNo||'').match(/^AR(\d+)$/i)||[])[1]||0)),0);return 'AR'+String(n+1).padStart(3,'0')}
+function photoDB(){if(photoDBPromise)return photoDBPromise;photoDBPromise=new Promise((resolve,reject)=>{let req=indexedDB.open(PHOTO_DB,1);req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains('photos'))req.result.createObjectStore('photos',{keyPath:'id'})};req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)});return photoDBPromise}
+async function getPhotos(date){let db=await photoDB();return new Promise((resolve,reject)=>{let tx=db.transaction('photos','readonly'),req=tx.objectStore('photos').getAll();req.onsuccess=()=>resolve(req.result.filter(x=>x.date===date));req.onerror=()=>reject(req.error)})}
+async function savePhotoRecord(r){let db=await photoDB();return new Promise((resolve,reject)=>{let tx=db.transaction('photos','readwrite');tx.objectStore('photos').put(r);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)})}
+async function deletePhotos(date){let rows=await getPhotos(date),db=await photoDB();return new Promise((resolve,reject)=>{let tx=db.transaction('photos','readwrite'),s=tx.objectStore('photos');rows.forEach(r=>s.delete(r.id));tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)})}
+function compressImage(file){return new Promise((resolve,reject)=>{let reader=new FileReader();reader.onerror=()=>reject(reader.error);reader.onload=()=>{let img=new Image();img.onerror=()=>reject(Error('Image open nahi hui'));img.onload=()=>{let scale=Math.min(1,1400/Math.max(img.width,img.height)),c=document.createElement('canvas');c.width=Math.round(img.width*scale);c.height=Math.round(img.height*scale);c.getContext('2d').drawImage(img,0,0,c.width,c.height);c.toBlob(b=>b?resolve(b):reject(Error('Image compress nahi hui')),'image/jpeg',.78)};img.src=reader.result};reader.readAsDataURL(file)})}
+function photoUrl(blob){return URL.createObjectURL(blob)}
+function resetForm(){editingDate=null;$('entryForm').reset();$('entryDate').value=today();$('billNo').value='';$('cash').value='0';$('online').value='0';$('extra').value='0';$('extraMode').value='no';$('paymentPhotos').value='';$('selectedPhotoPreview').innerHTML='';$('formTitle').textContent='➕ Aaj ka Hisab Add Karein';$('saveBtn').textContent='💾 Hisab Save Karein'}
+function render(){
+ let t=today(),list=all(),tr=records[t]||{cash:0,online:0,extra:0,extraMode:'no'};
+ $('todayCash').textContent=money(tr.cash);$('todayOnline').textContent=money(tr.online);$('todayTotal').textContent=money(total(tr));$('grandTotal').textContent=money(list.reduce((a,r)=>a+total(r),0));
+ let lifeCash=sum(list,'cash'),lifeOnline=sum(list,'online');$('lifeCash').textContent=money(lifeCash);$('lifeOnline').textContent=money(lifeOnline);$('lifeBusiness').textContent=money(lifeCash+lifeOnline);
+ $('todayLabel').textContent=dateObj(t).toLocaleDateString('en-IN',{weekday:'long',day:'2-digit',month:'short',year:'numeric'});
+ let month=$('searchDate').value||t.slice(0,7),ml=list.filter(r=>r.date.startsWith(month));
+ $('monthCash').textContent=money(sum(ml,'cash'));$('monthOnline').textContent=money(sum(ml,'online'));$('monthTotal').textContent=money(ml.reduce((a,r)=>a+total(r),0));
+ let body=$('historyBody');body.innerHTML='';$('emptyState').hidden=ml.length>0;
+ ml.forEach(r=>{let tr=document.createElement('tr');tr.innerHTML=`<td><b class="billno">${esc(r.billNo||'')}</b></td><td>${dayName(r.date)}<br><span class="muted">${dateObj(r.date).toLocaleDateString('en-IN')}</span></td><td><strong>${money(r.cash)}</strong></td><td><strong>${money(r.online)}</strong></td><td>${money(r.extra)}</td><td><span class="tag">${money(total(r))}</span></td><td class="no-print"><button class="btn mini" data-edit="${r.date}">Edit</button> <button class="btn red mini" data-del="${r.date}">Delete</button> <button class="btn blue mini" data-bill="${r.date}">PDF</button> <button class="btn mini" data-share="${r.date}">WhatsApp</button></td>`;body.appendChild(tr)});
+ let gallery=$('billGallery');gallery.innerHTML='';$('galleryEmpty').hidden=ml.length>0;
+ ml.forEach(r=>{let card=document.createElement('div');card.className='bill-card';card.dataset.openbill=r.date;card.innerHTML=`<div class="bill-date">🧾 ${esc(r.billNo||'NO-BILL')}</div><div class="bill-day">${r.date}</div><div class="bill-day">${dayName(r.date)}</div><div class="bill-total">${money(total(r))}</div><div class="bill-break"><span>💵 ${money(r.cash)}</span><span>📱 ${money(r.online)}</span></div><div class="bill-break"><span>Extra ${money(r.extra)}</span><b>Tap to view →</b></div>`;gallery.appendChild(card);getPhotos(r.date).then(rows=>{if(rows.length){let line=document.createElement('div');line.className='gallery-photo-row';rows.slice(0,3).forEach(row=>{let im=document.createElement('img');im.src=photoUrl(row.blob);im.alt='Payment photo';line.appendChild(im)});let label=document.createElement('span');label.textContent=rows.length+' photo(s)';line.appendChild(label);card.appendChild(line)}}).catch(()=>{})})
+}
+const UTR_KEY='daily_hisab_seen_utr_v1';
+function getSeenUtrs(){try{return JSON.parse(localStorage.getItem(UTR_KEY)||'[]')}catch(e){return []}}
+$('utrDate').value=today();
+$('matchUtrBtn').onclick=()=>{
+ let note=$('notifText').value.trim(),utr=$('utrNumber').value.trim(),amount=Number($('utrAmount').value),d=$('utrDate').value||today(),status=$('utrStatus');
+ if(!note||!utr||!Number.isFinite(amount)||amount<=0){status.textContent='Notification text, UTR aur sahi amount bharein.';return}
+ let seen=getSeenUtrs();if(seen.includes(utr.toUpperCase())){status.textContent='❌ Yeh UTR pehle add ho chuka hai.';return}
+ let digits=note.replace(/,/g,'').match(/(?:₹|Rs\.?\s*)(\d+(?:\.\d{1,2})?)/i),detected=digits?Number(digits[1]):null;
+ if(detected!==null&&Math.abs(detected-amount)>.009){status.textContent='❌ Notification amount aur dala gaya amount match nahi karte.';return}
+ if(!/received|credited|paid|payment|रुपये|प्राप्त/i.test(note)){status.textContent='⚠️ Incoming payment ka clear text nahi mila.';return}
+ if(!confirm('Notification text aur amount match hain. '+money(amount)+' ko '+d+' ke Online hisaab mein add karein? Yeh bank se live verified nahi hai.'))return;
+ let r=records[d]||{date:d,billNo:makeBillNo(),cash:0,online:0,extra:0,extraMode:'no',note:'UTR payment'};
+ r.online=(Number(r.online)||0)+amount;r.note=(r.note?r.note+' | ':'')+'UTR '+utr+' (notification matched)';records[d]=r;saveRecords();seen.push(utr.toUpperCase());localStorage.setItem(UTR_KEY,JSON.stringify(seen));$('searchDate').value=d.slice(0,7);status.textContent='✅ Payment Online hisaab mein add ho gaya. Bank verification nahi hui.';$('notifText').value='';$('utrNumber').value='';$('utrAmount').value='';render()
+};
+$('entryForm').onsubmit=async e=>{
+ e.preventDefault();let d=$('entryDate').value;if(!d)return;
+ let requested=$('billNo').value.trim().toUpperCase(),billNo=requested||((editingDate&&records[editingDate])?records[editingDate].billNo:makeBillNo());
+ if(!/^AR[0-9]{3,}$/.test(billNo)){alert('Bill Number AR se shuru hona chahiye, jaise AR001.');return}
+ let duplicate=Object.values(records).some(x=>String(x.billNo||'').toUpperCase()===billNo&&x.date!==editingDate&&x.date!==d);if(duplicate){alert('Yeh Bill Number pehle se use ho chuka hai.');return}
+ let r={date:d,billNo,cash:+$('cash').value||0,online:+$('online').value||0,extra:+$('extra').value||0,extraMode:$('extraMode').value,note:$('note').value.trim()};
+ if(r.cash<0||r.online<0){alert('Amount zero se kam nahi ho sakta.');return}
+ if(editingDate&&editingDate!==d)delete records[editingDate];
+ records[d]=r;saveRecords();
+ let pending=[...$('paymentPhotos').files];
+ if(pending.length){try{let existing=await getPhotos(d);if(existing.length+pending.length>8)alert('Ek din mein maximum 8 payment photos rakh sakte hain.');else for(let f of pending){if(!f.type.startsWith('image/'))continue;let blob=await compressImage(f);await savePhotoRecord({id:d+'_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),date:d,name:f.name,blob,addedAt:new Date().toISOString()})}}catch(err){alert('Hisab save hua, lekin photo save nahi hui: '+err.message)}}
+ $('searchDate').value=d.slice(0,7);resetForm();render();alert('Hisab save ho gaya!')
+};
+$('resetBtn').onclick=resetForm;
+$('paymentPhotos').onchange=()=>{let host=$('selectedPhotoPreview');host.innerHTML='';[...$('paymentPhotos').files].slice(0,8).forEach(file=>{let img=document.createElement('img');img.src=URL.createObjectURL(file);img.className='photo-thumb';img.alt=file.name;host.appendChild(img)});if($('paymentPhotos').files.length>8)alert('Ek din mein maximum 8 photos select karein.')};
+$('searchDate').onchange=render;
+function openBillPreview(d){
+ let r=records[d];if(!r)return;selectedBillDate=d;
+ $('billPreview').innerHTML=`<div class="preview-bill"><h3>DAILY HISAB</h3><p><b>Bill No: ${esc(r.billNo||'')}</b></p><p>${dayName(d)} • ${d}</p><div class="preview-row"><span>💵 Cash</span><b>${money(r.cash)}</b></div><div class="preview-row"><span>📱 Online</span><b>${money(r.online)}</b></div><div class="preview-row"><span>Other / Extra</span><b>${money(r.extra)}</b></div><div class="preview-row"><span>Note</span><b>${esc(r.note||'-')}</b></div><div class="preview-row preview-total"><span>TOTAL</span><span>${money(total(r))}</span></div></div>`;
+ $('billModal').classList.add('show');$('savedPhotoPreview').innerHTML='';$('savedPhotoCount').textContent='Photos load ho rahi hain...';
+ getPhotos(d).then(rows=>{$('savedPhotoPreview').innerHTML='';$('savedPhotoCount').textContent=rows.length?rows.length+' payment photo(s) saved':'Koi payment photo save nahi hai.';rows.forEach(row=>{let url=photoUrl(row.blob),img=document.createElement('img');img.src=url;img.className='photo-thumb';img.alt=row.name||'Payment photo';img.onclick=()=>{$('lightboxImage').src=url;$('photoLightbox').classList.add('show')};$('savedPhotoPreview').appendChild(img)})}).catch(()=>$('savedPhotoCount').textContent='Photos load nahi ho paayi.')
+}
+$('billGallery').onclick=e=>{let card=e.target.closest('[data-openbill]');if(card)openBillPreview(card.dataset.openbill)};
+$('findBillBtn').onclick=()=>{let q=$('billLookup').value.trim().toUpperCase();if(!q){alert('Bill number likhein.');return}let match=Object.values(records).find(r=>String(r.billNo||'').toUpperCase()===q)||Object.values(records).find(r=>String(r.billNo||'').toUpperCase().includes(q));if(match){$('searchDate').value=match.date.slice(0,7);render();openBillPreview(match.date)}else alert('Is Bill Number ka record nahi mila.')};
+$('billLookup').onkeydown=e=>{if(e.key==='Enter')$('findBillBtn').click()};
+$('closePhoto').onclick=()=>$('photoLightbox').classList.remove('show');$('photoLightbox').onclick=e=>{if(e.target===$('photoLightbox'))$('photoLightbox').classList.remove('show')};$('closeModal').onclick=()=>$('billModal').classList.remove('show');
+$('modalDownload').onclick=()=>{if(selectedBillDate)makePdf([records[selectedBillDate]],'Daily Hisab Bill',false)};
+$('modalShare').onclick=()=>{if(selectedBillDate)makePdf([records[selectedBillDate]],'Daily Hisab Bill',true)};
+$('modalImage').onclick=()=>{if(selectedBillDate)makeBillImage(records[selectedBillDate])};
+$('modalDelete').onclick=()=>{if(!selectedBillDate||!records[selectedBillDate])return;if(confirm(selectedBillDate+' ka history delete karna hai?')){delete records[selectedBillDate];saveRecords();deletePhotos(selectedBillDate).catch(()=>{});$('billModal').classList.remove('show');render()}};
+$('historyBody').onclick=e=>{
+ let edit=e.target.dataset.edit,del=e.target.dataset.del,bill=e.target.dataset.bill,share=e.target.dataset.share;
+ if(edit){let r=records[edit];editingDate=edit;$('entryDate').value=r.date;$('billNo').value=r.billNo||'';$('cash').value=r.cash;$('online').value=r.online;$('extra').value=r.extra;$('extraMode').value=r.extraMode||'yes';$('note').value=r.note||'';$('formTitle').textContent='✏️ Hisab Edit Karein';$('saveBtn').textContent='Update Hisab';window.scrollTo({top:0,behavior:'smooth'})}
+ if(del&&confirm(del+' ka hisab delete karna hai?')){delete records[del];saveRecords();deletePhotos(del).catch(()=>{});render()}
+ if(bill)makePdf([records[bill]],'Daily Hisab Bill',false);if(share)makePdf([records[share]],'Daily Hisab Bill',true)
+};
+function download(content,name,type){let a=document.createElement('a'),url=URL.createObjectURL(new Blob([content],{type}));a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+function safeName(s){return String(s).replace(/[^a-z0-9-]/gi,'-')}
+function makeBillImage(r){
+ let c=document.createElement('canvas');c.width=1200;c.height=1440;let x=c.getContext('2d');x.fillStyle='#eef4ff';x.fillRect(0,0,1200,1440);let g=x.createLinearGradient(0,0,1200,300);g.addColorStop(0,'#153e70');g.addColorStop(1,'#7546a6');x.fillStyle=g;x.fillRect(0,0,1200,300);x.fillStyle='#fff';x.font='bold 72px Arial';x.fillText('DAILY HISAB',70,120);x.font='32px Arial';x.fillText('BILL: '+(r.billNo||'-')+' | '+r.date,70,210);let lines=[['CASH',money(r.cash)],['ONLINE',money(r.online)],['EXTRA',money(r.extra)],['TOTAL',money(total(r))],['NOTE',r.note||'-']];lines.forEach((v,i)=>{let y=420+i*150;x.fillStyle='#fff';x.fillRect(60,y-65,1080,110);x.fillStyle='#243b5b';x.font='bold 38px Arial';x.fillText(v[0],100,y);x.textAlign='right';x.fillText(v[1],1080,y);x.textAlign='left'});c.toBlob(blob=>download(blob,'daily-hisab-'+r.date+'.png','image/png'),'image/png')
+}
+async function pdfBlob(list,title){
+ let rows=[...list].sort((a,b)=>a.date.localeCompare(b.date)),html=`<html><head><meta charset="utf-8"><style>body{font-family:Arial;padding:25px;color:#17253a}h1{background:#173f70;color:white;padding:25px}table{width:100%;border-collapse:collapse}td,th{padding:10px;border:1px solid #ccc;text-align:left}.total{font-weight:bold;background:#e7f7f1}</style></head><body><h1>${esc(title)}</h1><table><tr><th>Date</th><th>Bill No.</th><th>Cash</th><th>Online</th><th>Extra</th><th>Total</th></tr>`;
+ rows.forEach(r=>html+=`<tr><td>${r.date}</td><td>${esc(r.billNo||'')}</td><td>${money(r.cash)}</td><td>${money(r.online)}</td><td>${money(r.extra)}</td><td>${money(total(r))}</td></tr>`);
+ html+=`</table><h2>Grand Total: ${money(rows.reduce((a,r)=>a+total(r),0))}</h2></body></html>`;
+ return new Blob([html],{type:'text/html'})
+}
+async function makePdf(list,title,share){
+ if(!list.length){alert('Record nahi mila.');return}
+ let blob=await pdfBlob(list,title),date=list.length===1?(list[0].billNo||list[0].date):'full-history',file=new File([blob],`daily-hisab-${safeName(date)}.html`,{type:'text/html'});
+ if(share&&navigator.share){try{await navigator.share({files:[file],title:'Daily Hisab',text:'Daily Hisab Statement'});return}catch(e){}}
+ download(blob,file.name,'text/html');alert('Statement file download ho gayi. Print karke PDF save kar sakte hain.')
+}
+$('billBtn').onclick=()=>{let d=$('entryDate').value,r=records[d];if(!r){r={date:d,cash:+$('cash').value||0,online:+$('online').value||0,extra:+$('extra').value||0,extraMode:$('extraMode').value,note:$('note').value};if(!r.cash&&!r.online&&!r.extra){alert('Pehle amount enter karein ya hisab save karein.');return}}makePdf([r],'Daily Bill',false)};
+$('allBillBtn').onclick=()=>makePdf(all(),'Complete Hisab History',false);
+$('shareTodayBtn').onclick=()=>{let r=records[$('entryDate').value];if(!r){alert('Pehle hisab save karein.');return}makePdf([r],'Daily Hisab Bill',true)};
+$('csvBtn').onclick=()=>{let rows=[['Date','Day','Cash','Online','Extra','Extra Included','Total','Note'],...all().reverse().map(r=>[r.date,dayName(r.date),r.cash,r.online,r.extra,r.extraMode==='yes'?'Yes':'No',total(r),r.note||''])],csv=rows.map(row=>row.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\r\n');download('\ufeff'+csv,'daily-hisab.csv','text/csv;charset=utf-8')};
+$('backupBtn').onclick=async()=>{try{let photoRows=[];for(let d of Object.keys(records)){for(let row of await getPhotos(d)){let dataUrl=await new Promise((resolve,reject)=>{let fr=new FileReader();fr.onload=()=>resolve(fr.result);fr.onerror=()=>reject(fr.error);fr.readAsDataURL(row.blob)});photoRows.push({id:row.id,date:row.date,name:row.name,dataUrl,addedAt:row.addedAt})}}download(JSON.stringify({format:'daily-hisab-backup-v2',exportedAt:new Date().toISOString(),records,photos:photoRows}),'daily-hisab-full-backup.json','application/json')}catch(err){alert('Backup nahi ban paya: '+err.message)}};
+$('clearAllBtn').onclick=()=>{if(confirm('Saari Daily Hisab history delete karein?')&&prompt('DELETE likhein')==='DELETE'){let dates=Object.keys(records);records={};saveRecords();Promise.all(dates.map(deletePhotos)).catch(()=>{});render()}};
+$('restoreFile').onchange=async e=>{let f=e.target.files[0];if(!f)return;try{let incoming=JSON.parse(await f.text()),imp=incoming.format==='daily-hisab-backup-v2'?incoming.records:incoming;if(!imp||typeof imp!=='object'||Array.isArray(imp))throw Error('Invalid backup');if(!confirm('Backup current history ke saath merge hoga. Same date update hogi. Continue?'))return;records={...records,...imp};saveRecords();if(incoming.format==='daily-hisab-backup-v2'&&Array.isArray(incoming.photos)){for(let p of incoming.photos){if(!p.date||!p.dataUrl)continue;let blob=await(await fetch(p.dataUrl)).blob();await savePhotoRecord({id:p.id||p.date+'_'+Date.now(),date:p.date,name:p.name||'payment-photo.jpg',blob,addedAt:p.addedAt||new Date().toISOString()})}}render();alert('Backup restore ho gaya.')}catch(err){alert('Backup restore nahi hua: '+err.message)}e.target.value=''};
+$('entryDate').value=today();$('searchDate').value=today().slice(0,7);render();
+</script>
+
+<section class="seth-ledger" id="sethCashLedger">
+<h2>💰 Seth को दिया गया Cash — अलग हिसाब</h2>
+<p>यह हिसाब Daily Cash / Online / Extra और पुरानी History से अलग सेव होगा।</p>
+<div class="seth-stats">
+<div class="seth-stat"><small>कुल उपलब्ध कैश</small><strong id="sethSumCash">₹0</strong></div>
+<div class="seth-stat"><small>Seth को कुल दिया</small><strong id="sethSumSent">₹0</strong></div>
+<div class="seth-stat"><small>बाकी कैश</small><strong id="sethSumBalance">₹0</strong></div>
+<div class="seth-stat"><small>कुल एंट्री</small><strong id="sethSumCount">0</strong></div>
+</div>
+<label for="sethEntryDate">तारीख</label><input id="sethEntryDate" type="date">
+<label for="sethAvailable">मेरे पास कितना कैश था?</label><input id="sethAvailable" type="number" min="0" step="0.01" placeholder="उदाहरण: 5000">
+<label for="sethSent">Seth को कितना कैश दिया?</label><input id="sethSent" type="number" min="0" step="0.01" placeholder="उदाहरण: 3000">
+<label for="sethMemo">नोट (वैकल्पिक)</label><input id="sethMemo" type="text" placeholder="जैसे आज का कैश दिया">
+<p><b>इस एंट्री में बाकी:</b> <span id="sethEntryBalance">₹0</span></p>
+<div class="seth-actions"><button type="button" id="sethSave">💾 Seth Cash सेव करें</button><button type="button" class="seth-cancel" id="sethCancel" hidden>कैंसल</button></div>
+<h3>📒 Seth Cash History</h3>
+<div class="seth-table-wrap"><table><thead><tr><th>तारीख</th><th>मेरे पास</th><th>दिया</th><th>बाकी</th><th>नोट</th><th>एक्शन</th></tr></thead><tbody id="sethRows"></tbody></table></div>
+<p id="sethNoRows" hidden>अभी कोई Seth Cash एंट्री नहीं है।</p>
+</section>
+<script>
+(function(){
+'use strict';
+const KEY='daily_hisab_seth_cash_ledger_v1',el=id=>document.getElementById(id);
+let rows=[],editing=null;
+const fmt=n=>'₹'+Number(n||0).toLocaleString('en-IN',{maximumFractionDigits:2});
+function load(){try{let v=JSON.parse(localStorage.getItem(KEY)||'[]');rows=Array.isArray(v)?v:[]}catch(e){rows=[]}}
+function persist(){localStorage.setItem(KEY,JSON.stringify(rows))}
+function dateToday(){let d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function entryBalance(){let a=Number(el('sethAvailable').value||0),b=Number(el('sethSent').value||0);el('sethEntryBalance').textContent=fmt(a-b)}
+function reset(){editing=null;el('sethEntryDate').value=dateToday();el('sethAvailable').value='';el('sethSent').value='';el('sethMemo').value='';el('sethSave').textContent='💾 Seth Cash सेव करें';el('sethCancel').hidden=true;entryBalance()}
+function render(){
+ let cash=rows.reduce((n,r)=>n+Number(r.available||0),0),sent=rows.reduce((n,r)=>n+Number(r.sent||0),0);
+ el('sethSumCash').textContent=fmt(cash);el('sethSumSent').textContent=fmt(sent);el('sethSumBalance').textContent=fmt(cash-sent);el('sethSumCount').textContent=String(rows.length);
+ let body=el('sethRows');body.replaceChildren();let ordered=[...rows].sort((a,b)=>String(b.date).localeCompare(String(a.date)));el('sethNoRows').hidden=ordered.length!==0;
+ ordered.forEach(r=>{let tr=document.createElement('tr');[r.date,fmt(r.available),fmt(r.sent),fmt(Number(r.available)-Number(r.sent)),r.memo||'—'].forEach(v=>{let td=document.createElement('td');td.textContent=v;tr.appendChild(td)});let td=document.createElement('td'),edit=document.createElement('button'),del=document.createElement('button');edit.type=del.type='button';edit.className='seth-edit';del.className='seth-delete';edit.textContent='Edit';del.textContent='Delete';edit.onclick=()=>editRow(r.id);del.onclick=()=>deleteRow(r.id);td.append(edit,del);tr.appendChild(td);body.appendChild(tr)})
+}
+function editRow(id){let r=rows.find(x=>x.id===id);if(!r)return;editing=id;el('sethEntryDate').value=r.date;el('sethAvailable').value=r.available;el('sethSent').value=r.sent;el('sethMemo').value=r.memo||'';el('sethSave').textContent='अपडेट करें';el('sethCancel').hidden=false;entryBalance();el('sethCashLedger').scrollIntoView({behavior:'smooth',block:'start'})}
+function deleteRow(id){if(!confirm('क्या यह Seth Cash एंट्री हटानी है?'))return;rows=rows.filter(x=>x.id!==id);persist();render();if(editing===id)reset()}
+el('sethAvailable').oninput=entryBalance;el('sethSent').oninput=entryBalance;el('sethCancel').onclick=reset;
+el('sethSave').onclick=()=>{
+let date=el('sethEntryDate').value,available=Number(el('sethAvailable').value),sent=Number(el('sethSent').value),memo=el('sethMemo').value.trim();
+if(!date||el('sethAvailable').value===''||el('sethSent').value===''){alert('तारीख, उपलब्ध कैश और Seth को दिया पैसा भरें।');return}
+if(!Number.isFinite(available)||!Number.isFinite(sent)||available<0||sent<0){alert('कृपया सही रकम डालें।');return}
+if(sent>available){alert('Seth को दिया पैसा उपलब्ध कैश से ज्यादा नहीं हो सकता।');return}
+if(editing){let i=rows.findIndex(x=>x.id===editing);if(i>=0)rows[i]={...rows[i],date,available,sent,memo}}
+else rows.push({id:'S-'+Date.now()+'-'+Math.random().toString(36).slice(2,8),date,available,sent,memo,createdAt:new Date().toISOString()});
+persist();render();reset();alert('Seth Cash हिसाब सेव हो गया।')
+};
+load();reset();render();
+})();
+</script>
+</body>
+</html>
