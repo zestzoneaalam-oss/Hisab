@@ -1,0 +1,37 @@
+<!-- DAILY HISAB: PDF DOWNLOAD + WHATSAPP BUTTONS -->
+<script>
+(function () {
+  const oldButtons = document.createElement("section");
+  oldButtons.className = "card no-print";
+  oldButtons.innerHTML = `
+    <h2>📄 Daily Hisab PDF & WhatsApp</h2>
+    <p class="muted">सभी तारीखों का पूरा रिकॉर्ड एक PDF में डाउनलोड करें या WhatsApp पर भेजें।</p>
+    <div class="actions">
+      <button class="btn purple" id="downloadCompletePDF">
+        ⬇️ पूरी हिस्ट्री PDF डाउनलोड
+      </button>
+      <button class="btn blue" id="whatsappCompletePDF">
+        📲 पूरी हिस्ट्री WhatsApp पर भेजें
+      </button>
+    </div>
+  `;
+
+  document.querySelector(".wrap").appendChild(oldButtons);
+
+  document.getElementById("downloadCompletePDF").onclick = function () {
+    if (typeof makePdf !== "function") {
+      alert("PDF सुविधा नहीं मिली। पुराने PDF कोड को सुरक्षित रखें।");
+      return;
+    }
+    makePdf(all(), "Complete Daily Hisab History", false);
+  };
+
+  document.getElementById("whatsappCompletePDF").onclick = function () {
+    if (typeof makePdf !== "function") {
+      alert("PDF सुविधा नहीं मिली।");
+      return;
+    }
+    makePdf(all(), "Complete Daily Hisab History", true);
+  };
+})();
+</script>p
